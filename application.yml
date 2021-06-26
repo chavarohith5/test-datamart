@@ -2,6 +2,7 @@ source_list:
   - CP
   - OL
   - SB
+  - ADDR
 
 OL:
   sftp_conf:
