@@ -26,7 +26,7 @@ ADDR:
 
 
 s3_conf:
-  s3_bucket: vinaysbt
+  s3_bucket: practicebuckettarun
   staging_dir: staging
 
 
