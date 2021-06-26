@@ -17,7 +17,7 @@ SB:
 
 CP:
   s3_conf:
-    s3_bucket: vinaysbt
+    s3_bucket: practicebuckettarun
     filename: KC_Extract_1_20171009.csv
 
 ADDR:
