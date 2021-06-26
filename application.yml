@@ -1,8 +1,5 @@
 source_list:
   - CP
-  - OL
-  - SB
-  - ADDR
 
 target_list:
   - REGIS_DIM

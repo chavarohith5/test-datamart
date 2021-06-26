@@ -74,8 +74,8 @@ if __name__ == '__main__':
             print("\nReading customers data from S3 and write it to s3") # kc_extract.. KC_Extract_1_20171009
             cp_df = spark.read \
                 .option("mode", "DROPMALFORMED") \
-                .option("header", "false") \
                 .option("delimiter", "|") \
+                .option('header', 'true')\
                 .option("inferSchema", "true") \
                 .csv("s3a://" + src_conf["s3_conf"]["s3_bucket"] + "/" + src_conf["s3_conf"]["filename"])
             cp_df = cp_df.withColumn("ins_dt", current_date())

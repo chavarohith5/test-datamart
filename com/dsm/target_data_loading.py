@@ -42,3 +42,7 @@ if __name__ == '__main__':
             cp_df.createOrReplaceTempView(tgt_conf['source_data'])
 
             spark.sql(tgt_conf['loadingQuery']).show()
+
+
+# spark-submit --packages "org.apache.hadoop:hadoop-aws:2.7.4" com/dsm/target_data_loading.py
+
