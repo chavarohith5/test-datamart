@@ -17,6 +17,6 @@ def get_mysql_jdbc_url(mysql_config: dict):
 def write_to_s3(df, path):
     print('Writing data to', path)
     df.write \
-        .mode("append") \
+        .mode("overwrite") \
         .partitionBy("ins_dt") \
         .parquet(path)
