@@ -40,8 +40,8 @@ if __name__ == '__main__':
                 .parquet(staging_path + '/' + tgt_conf['source_data'])\
                 .createOrReplaceTempView(tgt_conf['source_data'])
 
-            regis_dim_df = spark.sql(tgt_conf['loadingQuery']).show()
-
+            regis_dim_df = spark.sql(tgt_conf['loadingQuery'])
+            regis_dim_df.show()
             jdbc_url = ut.get_redshift_jdbc_url(app_secret)
 
             regis_dim_df.coalesce(1).write\
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                 .option("url", jdbc_url) \
                 .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
                 .option("forward_spark_s3_credentials", "true") \
-                .option("dbtable", 'public.test') \
+                .option("dbtable", tgt_conf['tableName']) \
                 .mode("overwrite")\
                 .save()
 
