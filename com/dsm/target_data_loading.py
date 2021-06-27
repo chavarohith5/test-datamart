@@ -72,7 +72,7 @@ if __name__ == '__main__':
                 .mode("append")\
                 .save()
 
-        if tgt == 'RTL_TXN_FACT':
+        if tgt == 'RTL_TXN_FCT':
             print('Creating RTL_TXN_FACT table data')
             spark.read\
                 .parquet(staging_path + '/' + tgt_conf['source_data'])\
