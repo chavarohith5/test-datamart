@@ -86,7 +86,7 @@ if __name__ == '__main__':
             regis_dm_df = spark.read \
                 .format("io.github.spark_redshift_community.spark.redshift") \
                 .option("url", jdbc_url) \
-                .option("query", "select * from {} where ins_dt = current_date".format(tgt_conf["target_src_query"])) \
+                .option("query", "select * from {0}.{1} where ins_dt = current_date".format(app_conf['datamart_schema'], tgt_conf["target_src_query"])) \
                 .option("forward_spark_s3_credentials", "true") \
                 .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
                 .load()

@@ -4,6 +4,8 @@ source_list:
 target_list:
   - RTL_TXN_FCT
 
+datamart_schema: DATAMART
+
 OL:
   sftp_conf:
       filetype: csv
