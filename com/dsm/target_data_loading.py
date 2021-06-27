@@ -77,7 +77,8 @@ if __name__ == '__main__':
             ut.read_from_redshift(spark,
                                   jdbc_url,
                                   s3_temp_path,
-                                  "select * from {0}.{1} where ins_dt = '2021-06-26'".format(app_conf['datamart_schema'], tgt_conf["target_src_query"]))
+                                  "select * from {0}.{1} where ins_dt = '2021-06-26'".format(app_conf['datamart_schema'], tgt_conf["target_src_query"]))\
+            .createOrReplaceTempView(tgt_conf['target_src_table'])
 
             rtl_txn_fct_df = spark.sql(tgt_conf['loadingQuery'])
             rtl_txn_fct_df.show()
