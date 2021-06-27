@@ -55,7 +55,7 @@ CHILD_DIM:
       FROM
           CP
       WHERE
-          INS_DT = CURRENT_DATE AND CHILD_ID IS NOT NULL
+          INS_DT = '2021-06-26' AND CHILD_ID IS NOT NULL
       ) CP
 
 
