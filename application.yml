@@ -1,7 +1,4 @@
 source_list:
-  - OL
-  - SB
-  - CP
   - ADDR
 
 target_list:
