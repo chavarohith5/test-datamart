@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 .mode("append")\
                 .save()
 
-        if tgt == 'CHILD_DIM':
+        elif tgt == 'CHILD_DIM':
             print('Creating CHILD_DIM table data')
             spark.read\
                 .parquet(staging_path + '/' + tgt_conf['source_data'])\
@@ -72,17 +72,30 @@ if __name__ == '__main__':
                 .mode("append")\
                 .save()
 
-        if tgt == 'RTL_TXN_FCT':
+        elif tgt == 'RTL_TXN_FCT':
             print('Creating RTL_TXN_FACT table data')
-            spark.read\
-                .parquet(staging_path + '/' + tgt_conf['source_data'])\
-                .createOrReplaceTempView(tgt_conf['source_data'])
+            for src in tgt_conf['source_data']:
+                spark.read\
+                    .parquet(staging_path + '/' + src)\
+                    .createOrReplaceTempView(src)
 
-            regis_dim_df = spark.sql(tgt_conf['loadingQuery'])
-            regis_dim_df.show()
+            # read from redshift
+
             jdbc_url = ut.get_redshift_jdbc_url(app_secret)
+            print(jdbc_url)
+            regis_dm_df = spark.read \
+                .format("io.github.spark_redshift_community.spark.redshift") \
+                .option("url", jdbc_url) \
+                .option("query", "select * from {} where ins_dt = current_date".format(tgt_conf["target_src_query"])) \
+                .option("forward_spark_s3_credentials", "true") \
+                .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
+                .load()
+            regis_dm_df.show()
+            regis_dm_df.createOrReplaceTempView(tgt_conf["target_src_query"])
+            rtl_txn_fct_df = spark.sql(tgt_conf['loadingQuery'])
+            rtl_txn_fct_df.show()
 
-            regis_dim_df.coalesce(1).write\
+            rtl_txn_fct_df.coalesce(1).write\
                 .format("io.github.spark_redshift_community.spark.redshift") \
                 .option("url", jdbc_url) \
                 .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
