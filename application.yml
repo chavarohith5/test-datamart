@@ -25,7 +25,7 @@ SB:
 
 CP:
   s3_conf:
-    s3_bucket: practicebuckettarun
+    s3_bucket: rohith-test234
     filename: KC_Extract_1_20171009.csv
 
 ADDR:
@@ -91,7 +91,7 @@ RTL_TXN_FCT:
             AND (REC.INS_DT = '2021-06-26' OR REC.INS_DT is NULL)
 
 s3_conf:
-  s3_bucket: practicebuckettarun
+  s3_bucket: rohith-test234
   staging_dir: staging
 
 redshift_conf:
