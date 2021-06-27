@@ -33,7 +33,7 @@ if __name__ == '__main__':
     for tgt in tgt_list:
         staging_path = "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/" + app_conf["s3_conf"]["staging_dir"]
         tgt_conf = app_conf[tgt]
-
+        s3_temp_path = "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp"
         if tgt == 'REGIS_DIM':
             print('Creating REGIS_DIM table data')
             spark.read\
@@ -44,14 +44,10 @@ if __name__ == '__main__':
             regis_dim_df.show()
             jdbc_url = ut.get_redshift_jdbc_url(app_secret)
 
-            regis_dim_df.coalesce(1).write\
-                .format("io.github.spark_redshift_community.spark.redshift") \
-                .option("url", jdbc_url) \
-                .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
-                .option("forward_spark_s3_credentials", "true") \
-                .option("dbtable", tgt_conf['tableName']) \
-                .mode("append")\
-                .save()
+            ut.write_to_redshift(regis_dim_df.coalesce(1),
+                                 jdbc_url,
+                                 "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp",
+                                 tgt_conf['tableName'])
 
         elif tgt == 'CHILD_DIM':
             print('Creating CHILD_DIM table data')
@@ -59,18 +55,14 @@ if __name__ == '__main__':
                 .parquet(staging_path + '/' + tgt_conf['source_data'])\
                 .createOrReplaceTempView(tgt_conf['source_data'])
 
-            regis_dim_df = spark.sql(tgt_conf['loadingQuery'])
-            regis_dim_df.show()
+            child_dim_df = spark.sql(tgt_conf['loadingQuery'])
+            child_dim_df.show()
             jdbc_url = ut.get_redshift_jdbc_url(app_secret)
 
-            regis_dim_df.coalesce(1).write\
-                .format("io.github.spark_redshift_community.spark.redshift") \
-                .option("url", jdbc_url) \
-                .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
-                .option("forward_spark_s3_credentials", "true") \
-                .option("dbtable", tgt_conf['tableName']) \
-                .mode("append")\
-                .save()
+            ut.write_to_redshift(child_dim_df.coalesce(1),
+                                 jdbc_url,
+                                 s3_temp_path,
+                                 tgt_conf['tableName'])
 
         elif tgt == 'RTL_TXN_FCT':
             print('Creating RTL_TXN_FACT table data')
@@ -79,30 +71,21 @@ if __name__ == '__main__':
                     .parquet(staging_path + '/' + src)\
                     .createOrReplaceTempView(src)
 
-            # read from redshift
-
             jdbc_url = ut.get_redshift_jdbc_url(app_secret)
-            print(jdbc_url)
-            regis_dm_df = spark.read \
-                .format("io.github.spark_redshift_community.spark.redshift") \
-                .option("url", jdbc_url) \
-                .option("query", "select * from {0}.{1} where ins_dt = '2021-06-26'".format(app_conf['datamart_schema'], tgt_conf["target_src_query"])) \
-                .option("forward_spark_s3_credentials", "true") \
-                .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
-                .load()
-            regis_dm_df.show()
-            regis_dm_df.createOrReplaceTempView(tgt_conf["target_src_query"])
+
+
+            ut.read_from_redshift(spark,
+                                  jdbc_url,
+                                  s3_temp_path,
+                                  "select * from {0}.{1} where ins_dt = '2021-06-26'".format(app_conf['datamart_schema'], tgt_conf["target_src_query"]))
+
             rtl_txn_fct_df = spark.sql(tgt_conf['loadingQuery'])
             rtl_txn_fct_df.show()
 
-            rtl_txn_fct_df.coalesce(1).write\
-                .format("io.github.spark_redshift_community.spark.redshift") \
-                .option("url", jdbc_url) \
-                .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
-                .option("forward_spark_s3_credentials", "true") \
-                .option("dbtable", tgt_conf['tableName']) \
-                .mode("append")\
-                .save()
+            ut.write_to_redshift(rtl_txn_fct_df.coalesce(1),
+                                 jdbc_url,
+                                 s3_temp_path,
+                                 tgt_conf['tableName'])
 
 
 # spark-submit --jars "https://s3.amazonaws.com/redshift-downloads/drivers/jdbc/1.2.36.1060/RedshiftJDBC42-no-awssdk-1.2.36.1060.jar" --packages "org.apache.spark:spark-avro_2.11:2.4.2,io.github.spark-redshift-community:spark-redshift_2.11:4.0.1,org.apache.hadoop:hadoop-aws:2.7.4" com/dsm/target_data_loading.py
