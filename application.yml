@@ -58,7 +58,7 @@ CHILD_DIM:
           INS_DT = '2021-06-26' AND CHILD_ID IS NOT NULL
       ) CP
 
-RTL_TXN_FACT:
+RTL_TXN_FCT:
   source_data:
     - SB
     - OL
