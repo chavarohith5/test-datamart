@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 .option("tempdir", "s3a://" + app_conf["s3_conf"]["s3_bucket"] + "/temp") \
                 .option("forward_spark_s3_credentials", "true") \
                 .option("dbtable", tgt_conf['tableName']) \
-                .mode("overwrite")\
+                .mode("append")\
                 .save()
 
 
